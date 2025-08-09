@@ -1,7 +1,6 @@
-# This is the supervaizer controller for the email agent
+# This is the basic  supervaizer controller for the Email-AI-Agent.
+# Use it as an example to experiment with the Email-AI-Agent with supervaize.com
 
-import shortuuid
-from rich.console import Console
 
 from supervaizer import (
     Agent,
@@ -11,6 +10,9 @@ from supervaizer import (
     ParametersSetup,
     Server,
 )
+
+import shortuuid
+from rich.console import Console
 
 
 # Public url of your hosted agent  (including port if needed)
