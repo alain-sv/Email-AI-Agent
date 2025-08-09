@@ -1,3 +1,4 @@
+from datetime import datetime
 from core.email_imap import fetch_imap_emails
 from core.email_sender import send_email, send_draft_to_gmail
 from utils.logger import get_logger
@@ -85,15 +86,24 @@ def process_email_workflow(
         return {"status": "error", "message": f"Error processing email: {str(e)}"}
 
 
-def check_email_status(email_id):
+def stop():
+    """Stop the email processing"""
+    logger.info("Stopping the email processing")
+    return {
+        "status": "stopped",
+        "timestamp": datetime.now().isoformat(),
+        "message": "TBD",
+    }
+
+
+def check_status():
     """Check status of email processing"""
-    logger.info(f"Checking status for email ID: {email_id}")
+    logger.info("Checking status of the processing")
 
     # This would typically check against a database or state store
     # For now, return a simple status
     return {
         "status": "completed",
-        "email_id": email_id,
-        "timestamp": "2024-01-01T00:00:00Z",
-        "message": "Email processing completed",
+        "timestamp": datetime.now().isoformat(),
+        "message": "TBD",
     }

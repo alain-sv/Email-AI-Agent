@@ -90,7 +90,7 @@ process_email_method = AgentMethod(
     params={},
     fields=[
         {
-            "name": "your_name",
+            "name": "Your Name",
             "type": str,
             "field_type": "CharField",
             "max_length": 100,
@@ -98,7 +98,7 @@ process_email_method = AgentMethod(
             "description": "Your name for email signature",
         },
         {
-            "name": "recipient_name",
+            "name": "Recipient Name",
             "type": str,
             "field_type": "CharField",
             "max_length": 100,
@@ -106,11 +106,11 @@ process_email_method = AgentMethod(
             "description": "Recipient's name",
         },
         {
-            "name": "email_choice",
+            "name": "Number of emails (1 to 10)",
             "type": int,
             "field_type": "IntegerField",
             "required": True,
-            "description": "Email selection (1-5 for latest emails)",
+            "description": "Number of emails to process (1-10)",
         },
         {
             "name": "action_type",
@@ -130,97 +130,24 @@ process_email_method = AgentMethod(
         },
     ],
 )
-
-# Define email action method
-email_action_method = AgentMethod(
-    name="email_action",
-    method="sv_main.process_email_action",
+job_stop = AgentMethod(
+    name="stop",  # Must be present
+    method="sv_main.stop",  # Initial deployment does not require this method to do anything
     is_async=False,
-    params={"action": "email_action"},
-    fields=[
-        {
-            "name": "email_data",
-            "type": dict,
-            "field_type": "JSONField",
-            "required": True,
-            "description": "Email data with response",
-        },
-        {
-            "name": "your_name",
-            "type": str,
-            "field_type": "CharField",
-            "max_length": 100,
-            "required": True,
-            "description": "Your name for signature",
-        },
-        {
-            "name": "action_type",
-            "type": str,
-            "field_type": "ChoiceField",
-            "choices": [("send", "Send Email"), ("draft", "Draft to Gmail")],
-            "required": True,
-            "description": "Action type: 'send' or 'draft'",
-        },
-        {
-            "name": "gmail_address",
-            "type": str,
-            "field_type": "CharField",
-            "max_length": 200,
-            "required": False,
-            "description": "Gmail address for drafts",
-        },
-    ],
 )
 
-# Define status check method
-status_method = AgentMethod(
-    name="check_status",
-    method="sv_main.check_email_status",
+job_status = AgentMethod(
+    name="status",  # Must be present
+    method="sv_main.check_status",  # Initial deployment does not require this method to do anything
     is_async=False,
-    params={"action": "check_status"},
-    fields=[
-        {
-            "name": "email_id",
-            "type": str,
-            "field_type": "CharField",
-            "max_length": 100,
-            "required": True,
-            "description": "Email ID to check status",
-        }
-    ],
 )
-
-# Define agent parameters
-agent_parameters = ParametersSetup.from_list([
-    Parameter(
-        name="OPENAI_API_KEY",
-        description="OpenAI API Key for AI processing",
-        is_environment=True,
-    ),
-    Parameter(
-        name="IMAP_USERNAME",
-        description="IMAP username for email access",
-        is_environment=True,
-    ),
-    Parameter(
-        name="IMAP_PASSWORD",
-        description="IMAP password for email access",
-        is_environment=True,
-    ),
-    Parameter(
-        name="IMAP_SERVER",
-        description="IMAP server address",
-        is_environment=True,
-    ),
-])
 
 # Define the email AI agent
 email_ai_agent = Agent(
     name="Email AI Agent",
-    id="email_ai_agent",
-    author="Email AI Team",
-    developer="AI Developer",
-    maintainer="AI Maintainer",
+    author="@parthshr370",  # Author of the agent
+    developer="@alain_sv",  # Developer of the controller
+    maintainer="@aintainer",
     editor="AI Editor",
     version="1.0.0",
     description="AI-powered email processing agent that can fetch, analyze, generate responses, and send/draft emails",
