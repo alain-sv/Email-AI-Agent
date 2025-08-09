@@ -11,7 +11,6 @@ from supervaizer import (
     Server,
 )
 
-import shortuuid
 from rich.console import Console
 
 
@@ -25,151 +24,228 @@ PROD_PUBLIC_URL = "https://myagent.cloud-hosting.net:8001"
 # Create a console with default style set to yellow
 console = Console(style="yellow")
 
-
 # Define the parameters and secrets expected by the agent
 agent_parameters = ParametersSetup.from_list([
     Parameter(
-        name="OPEN_API_KEY",
-        description="OpenAPI Key",
+        name="IMAP_USERNAME",
+        description="IMAP username for email access",
         is_environment=True,
+        is_secret=False,
     ),
     Parameter(
-        name="SERPER_API", description="Server API key updated", is_environment=True
+        name="IMAP_PASSWORD",
+        description="IMAP password for email access",
+        is_environment=True,
+        is_secret=True,
     ),
     Parameter(
-        name="COMPETITOR_SUMMARY_URL",
-        description="Competitor Summary URL",
+        name="IMAP_SERVER",
+        description="IMAP server address",
         is_environment=True,
+        is_secret=False,
+    ),
+    Parameter(
+        name="IMAP_PORT",
+        description="IMAP port for email access",
+        is_environment=True,
+        is_secret=False,
+    ),
+    Parameter(
+        name="EMAIL_SERVER",
+        description="Email server address",
+        is_environment=True,
+        is_secret=False,
+    ),
+    Parameter(
+        name="EMAIL_USERNAME",
+        description="Email username for email access",
+        is_environment=True,
+        is_secret=False,
+    ),
+    Parameter(
+        name="EMAIL_PASSWORD",
+        description="Email password for email access",
+        is_environment=True,
+        is_secret=True,
+    ),
+    Parameter(
+        name="EMAIL_PORT",
+        description="Email port for email access",
+        is_environment=True,
+        is_secret=False,
+    ),
+    Parameter(
+        name="DEEPSEEK_API_KEY",
+        description="DeepSeek API Key for AI processing",
+        is_environment=True,
+        is_secret=True,
     ),
 ])
 
-# Define the method used to start a job
-job_start_method = AgentMethod(
+# Define the main email processing method
+process_email_method = AgentMethod(
     name="start",
-    method="example_agent.example_synchronous_job_start",
+    method="sv_main.process_email_workflow",  # This will be the main workflow function
     is_async=False,
-    params={"action": "start"},
+    params={},
     fields=[
         {
-            "name": "Company to research",
+            "name": "your_name",
             "type": str,
             "field_type": "CharField",
             "max_length": 100,
             "required": True,
+            "description": "Your name for email signature",
         },
         {
-            "name": "Max number of results",
+            "name": "recipient_name",
+            "type": str,
+            "field_type": "CharField",
+            "max_length": 100,
+            "required": True,
+            "description": "Recipient's name",
+        },
+        {
+            "name": "email_choice",
             "type": int,
             "field_type": "IntegerField",
             "required": True,
+            "description": "Email selection (1-5 for latest emails)",
         },
         {
-            "name": "Subscribe to updates",
-            "type": bool,
-            "field_type": "BooleanField",
-            "required": False,
-        },
-        {
-            "name": "Type of research",
+            "name": "action_type",
             "type": str,
             "field_type": "ChoiceField",
-            "choices": [["A", "Advanced"], ["R", "Restricted"]],
-            "widget": "RadioSelect",
+            "choices": [("send", "Send Email"), ("draft", "Draft to Gmail")],
             "required": True,
+            "description": "Action type: 'send' or 'draft'",
         },
         {
-            "name": "Details of research",
+            "name": "gmail_address",
             "type": str,
             "field_type": "CharField",
-            "widget": "Textarea",
+            "max_length": 200,
             "required": False,
-        },
-        {
-            "name": "List of countries",
-            "type": list[str],
-            "field_type": "MultipleChoiceField",
-            "choices": [
-                ["PA", "Panama"],
-                ["PG", "Papua New Guinea"],
-                ["PY", "Paraguay"],
-                ["PE", "Peru"],
-                ["PH", "Philippines"],
-                ["PN", "Pitcairn"],
-                ["PL", "Poland"],
-            ],
-            "required": True,
-        },
-        {
-            "name": "languages",
-            "type": list[str],
-            "field_type": "MultipleChoiceField",
-            "choices": [["en", "English"], ["fr", "French"], ["es", "Spanish"]],
-            "required": False,
+            "description": "Gmail address for drafts (required if action_type is 'draft')",
         },
     ],
-    description="Start the collection of new competitor summary",
 )
 
-job_stop_method = AgentMethod(
-    name="stop",
-    method="control.stop",
-    params={"action": "stop"},
-    description="Stop the agent",
-)
-job_status_method = AgentMethod(
-    name="status",
-    method="hello.mystatus",
-    params={"status": "statusvalue"},
-    description="Get the status of the agent",
-)
-custom_method = AgentMethod(
-    name="custom",
-    method="control.custom",
-    params={"action": "custom"},
-    description="Custom method",
+# Define email action method
+email_action_method = AgentMethod(
+    name="email_action",
+    method="sv_main.process_email_action",
+    is_async=False,
+    params={"action": "email_action"},
+    fields=[
+        {
+            "name": "email_data",
+            "type": dict,
+            "field_type": "JSONField",
+            "required": True,
+            "description": "Email data with response",
+        },
+        {
+            "name": "your_name",
+            "type": str,
+            "field_type": "CharField",
+            "max_length": 100,
+            "required": True,
+            "description": "Your name for signature",
+        },
+        {
+            "name": "action_type",
+            "type": str,
+            "field_type": "ChoiceField",
+            "choices": [("send", "Send Email"), ("draft", "Draft to Gmail")],
+            "required": True,
+            "description": "Action type: 'send' or 'draft'",
+        },
+        {
+            "name": "gmail_address",
+            "type": str,
+            "field_type": "CharField",
+            "max_length": 200,
+            "required": False,
+            "description": "Gmail address for drafts",
+        },
+    ],
 )
 
-custom_method2 = AgentMethod(
-    name="custom2",
-    method="control.custom2",
-    params={"action": "custom2"},
-    description="Custom method",
+# Define status check method
+status_method = AgentMethod(
+    name="check_status",
+    method="sv_main.check_email_status",
+    is_async=False,
+    params={"action": "check_status"},
+    fields=[
+        {
+            "name": "email_id",
+            "type": str,
+            "field_type": "CharField",
+            "max_length": 100,
+            "required": True,
+            "description": "Email ID to check status",
+        }
+    ],
 )
 
+# Define agent parameters
+agent_parameters = ParametersSetup.from_list([
+    Parameter(
+        name="OPENAI_API_KEY",
+        description="OpenAI API Key for AI processing",
+        is_environment=True,
+    ),
+    Parameter(
+        name="IMAP_USERNAME",
+        description="IMAP username for email access",
+        is_environment=True,
+    ),
+    Parameter(
+        name="IMAP_PASSWORD",
+        description="IMAP password for email access",
+        is_environment=True,
+    ),
+    Parameter(
+        name="IMAP_SERVER",
+        description="IMAP server address",
+        is_environment=True,
+    ),
+])
 
-agent_name = "competitor_summary"
-
-# Define the Agent
-agent = Agent(
-    name=agent_name,
-    id=shortuuid.uuid(f"{agent_name}"),
-    author="John Doe",
-    developer="Developer",
-    maintainer="Ive Maintained",
-    editor="Yuri Editor",
-    version="1.3",
-    description="This is a test agent",
+# Define the email AI agent
+email_ai_agent = Agent(
+    name="Email AI Agent",
+    id="email_ai_agent",
+    author="Email AI Team",
+    developer="AI Developer",
+    maintainer="AI Maintainer",
+    editor="AI Editor",
+    version="1.0.0",
+    description="AI-powered email processing agent that can fetch, analyze, generate responses, and send/draft emails",
     urls={"dev": "http://host.docker.internal:8001", "prod": ""},
     active_environment="dev",
-    tags=["testtag", "testtag2"],
+    tags=["email", "ai", "automation", "communication"],
     methods=AgentMethods(
-        job_start=job_start_method,
-        job_stop=job_stop_method,
-        job_status=job_status_method,
+        job_start=process_email_method,
+        job_stop=status_method,
+        job_status=status_method,
         chat=None,
-        custom={"custom1": custom_method, "custom2": custom_method2},
+        custom=None,
     ),
     parameters_setup=agent_parameters,
 )
 
-# Define the Server
-sv_server = Server(
-    agents=[agent],
-    a2a_enabled=True,
+# Initialize a connection to the SUPERVAIZE server
+server = Server(
+    agents=[email_ai_agent],
+    acp_endpoints=True,  # Enable ACP protocol support
+    a2a_endpoints=True,  # Enable A2A protocol support
+    admin_interface=True,  # Enable web admin interface (requires api_key)
+    api_key=os.getenv("SUPERVAIZE_API_KEY"),  # Required for admin interface
     supervisor_account=None,
 )
 
-
-if __name__ == "__main__":
-    # Start the supervaize server
-    sv_server.launch(log_level="DEBUG")
+# Start the server
+server.launch(log_level="DEBUG")
