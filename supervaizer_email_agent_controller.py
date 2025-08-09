@@ -2,7 +2,9 @@
 # Use it as an example to experiment with the Email-AI-Agent with supervaize.com
 
 
+import os
 from supervaizer import (
+    Account,
     Agent,
     AgentMethod,
     AgentMethods,
@@ -151,17 +153,22 @@ email_ai_agent = Agent(
     editor="AI Editor",
     version="1.0.0",
     description="AI-powered email processing agent that can fetch, analyze, generate responses, and send/draft emails",
-    urls={"dev": "http://host.docker.internal:8001", "prod": ""},
-    active_environment="dev",
     tags=["email", "ai", "automation", "communication"],
     methods=AgentMethods(
         job_start=process_email_method,
-        job_stop=status_method,
-        job_status=status_method,
+        job_stop=job_stop,
+        job_status=job_status,
         chat=None,
         custom=None,
     ),
     parameters_setup=agent_parameters,
+)
+
+# Define the Supervaize account
+account = Account(
+    workspace_id=os.getenv("SUPERVAIZE_WORKSPACE_ID"),
+    api_key=os.getenv("SUPERVAIZE_API_KEY"),
+    api_url=os.getenv("SUPERVAIZE_API_URL"),
 )
 
 # Initialize a connection to the SUPERVAIZE server
@@ -170,9 +177,9 @@ server = Server(
     acp_endpoints=True,  # Enable ACP protocol support
     a2a_endpoints=True,  # Enable A2A protocol support
     admin_interface=True,  # Enable web admin interface (requires api_key)
-    api_key=os.getenv("SUPERVAIZE_API_KEY"),  # Required for admin interface
-    supervisor_account=None,
+    supervisor_account=account,  # Supervaize account
 )
 
 # Start the server
-server.launch(log_level="DEBUG")
+if __name__ == "__main__":
+    server.launch(log_level="DEBUG")
