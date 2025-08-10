@@ -1,7 +1,6 @@
 # This is the basic  supervaizer controller for the Email-AI-Agent.
 # Use it as an example to experiment with the Email-AI-Agent with supervaize.com
 
-
 import os
 from supervaizer import (
     Account,
@@ -27,7 +26,7 @@ PROD_PUBLIC_URL = "https://myagent.cloud-hosting.net:8001"
 console = Console(style="yellow")
 
 # Define the parameters and secrets expected by the agent
-agent_parameters = ParametersSetup.from_list([
+agent_parameters: ParametersSetup = ParametersSetup.from_list([
     Parameter(
         name="IMAP_USERNAME",
         description="IMAP username for email access",
@@ -85,7 +84,7 @@ agent_parameters = ParametersSetup.from_list([
 ])
 
 # Define the main email processing method
-process_email_method = AgentMethod(
+process_email_method: AgentMethod = AgentMethod(
     name="start",
     method="sv_main.process_email_workflow",  # This will be the main workflow function
     is_async=False,
@@ -118,7 +117,7 @@ process_email_method = AgentMethod(
             "name": "action_type",
             "type": str,
             "field_type": "ChoiceField",
-            "choices": [("send", "Send Email"), ("draft", "Draft to Gmail")],
+            "choices": ["send", "draft"],
             "required": True,
             "description": "Action type: 'send' or 'draft'",
         },
@@ -132,20 +131,20 @@ process_email_method = AgentMethod(
         },
     ],
 )
-job_stop = AgentMethod(
+job_stop: AgentMethod = AgentMethod(
     name="stop",  # Must be present
     method="sv_main.stop",  # Initial deployment does not require this method to do anything
     is_async=False,
 )
 
-job_status = AgentMethod(
+job_status: AgentMethod = AgentMethod(
     name="status",  # Must be present
     method="sv_main.check_status",  # Initial deployment does not require this method to do anything
     is_async=False,
 )
 
 # Define the email AI agent
-email_ai_agent = Agent(
+email_ai_agent: Agent = Agent(
     name="Email AI Agent",
     author="@parthshr370",  # Author of the agent
     developer="@alain_sv",  # Developer of the controller
@@ -165,14 +164,14 @@ email_ai_agent = Agent(
 )
 
 # Define the Supervaize account
-account = Account(
+account: Account = Account(
     workspace_id=os.getenv("SUPERVAIZE_WORKSPACE_ID"),
     api_key=os.getenv("SUPERVAIZE_API_KEY"),
     api_url=os.getenv("SUPERVAIZE_API_URL"),
 )
 
-# Initialize a connection to the SUPERVAIZE server
-server = Server(
+# Define the supervaizer server capabilities
+server: Server = Server(
     agents=[email_ai_agent],
     acp_endpoints=True,  # Enable ACP protocol support
     a2a_endpoints=True,  # Enable A2A protocol support
